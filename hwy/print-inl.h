@@ -37,7 +37,7 @@ namespace HWY_NAMESPACE {
 // Prints lanes around `lane`, in memory order.
 template <class D, class V = VFromD<D>>
 HWY_API void Print(const D d, const char* caption, V v, size_t lane_u = 0,
-                   size_t max_lanes = 7) {
+                   size_t max_lanes = 7, const char* fmt = nullptr) {
   const size_t N = Lanes(d);
   using T = TFromD<D>;
 #if HWY_TARGET == HWY_RVV
@@ -51,7 +51,7 @@ HWY_API void Print(const D d, const char* caption, V v, size_t lane_u = 0,
   Store(v, d, lanes);
 
   const auto info = hwy::detail::MakeTypeInfo<T>();
-  hwy::detail::PrintArray(info, caption, lanes, N, lane_u, max_lanes);
+  hwy::detail::PrintArray(info, caption, lanes, N, lane_u, max_lanes, fmt);
 }
 
 // NOLINTNEXTLINE(google-readability-namespace-comments)
