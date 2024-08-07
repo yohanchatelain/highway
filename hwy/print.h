@@ -49,11 +49,12 @@ HWY_INLINE TypeInfo MakeTypeInfo() {
 
 HWY_DLLEXPORT void TypeName(const TypeInfo& info, size_t N, char* string100);
 HWY_DLLEXPORT void ToString(const TypeInfo& info, const void* ptr,
-                            char* string100);
+                            char* string100, const char* fmt = nullptr);
 
 HWY_DLLEXPORT void PrintArray(const TypeInfo& info, const char* caption,
                               const void* array_void, size_t N,
-                              size_t lane_u = 0, size_t max_lanes = 7);
+                              size_t lane_u = 0, size_t max_lanes = 7,
+                              const char* fmt = nullptr);
 
 }  // namespace detail
 
