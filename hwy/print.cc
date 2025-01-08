@@ -19,6 +19,7 @@
 
 #include "hwy/base.h"
 #include "hwy/detect_compiler_arch.h"
+#include "hwy/highway.h"
 
 namespace hwy {
 namespace detail {
@@ -97,16 +98,31 @@ HWY_DLLEXPORT void ToString(const TypeInfo& info, const void* ptr,
       const char* fmt = customFmt ? customFmt : default_fmt;
       snprintf(string100, 100, fmt, value);  // NOLINT
     } else {
+#if HWY_HAVE_INTEGER64
+      uint64_t value;
+      CopyBytes<8>(ptr, &value);
+      const char* fmt = customFmt ? customFmt : "0x%016X";
+      snprintf(string100, 100, fmt, value);  // NOLINT
+#else
       const uint8_t* ptr8 = reinterpret_cast<const uint8_t*>(ptr);
       uint32_t lo, hi;
       CopyBytes<4>(ptr8 + (HWY_IS_LITTLE_ENDIAN ? 0 : 4), &lo);
       CopyBytes<4>(ptr8 + (HWY_IS_LITTLE_ENDIAN ? 4 : 0), &hi);
       const char* fmt = customFmt ? customFmt : "0x%08X%08X";
       snprintf(string100, 100, fmt, hi, lo);  // NOLINT
+#endif
     }
   } else if (info.sizeof_t == 16) {
     HWY_ASSERT(!info.is_float && !info.is_signed && !info.is_bf16);
     const uint8_t* ptr8 = reinterpret_cast<const uint8_t*>(ptr);
+#if HWY_HAVE_INTEGER64
+    uint64_t words[2];
+    CopyBytes<8>(ptr8 + (HWY_IS_LITTLE_ENDIAN ? 0 : 8), &words[0]);
+    CopyBytes<8>(ptr8 + (HWY_IS_LITTLE_ENDIAN ? 8 : 0), &words[1]);
+    // NOLINTNEXTLINE
+    const char* fmt = customFmt ? customFmt : "0x%016X_%016X";
+    snprintf(string100, 100, fmt, words[1], words[0]);
+#else
     uint32_t words[4];
     CopyBytes<4>(ptr8 + (HWY_IS_LITTLE_ENDIAN ? 0 : 12), &words[0]);
     CopyBytes<4>(ptr8 + (HWY_IS_LITTLE_ENDIAN ? 4 : 8), &words[1]);
@@ -115,6 +131,7 @@ HWY_DLLEXPORT void ToString(const TypeInfo& info, const void* ptr,
     // NOLINTNEXTLINE
     const char* fmt = customFmt ? customFmt : "0x%08X%08X_%08X%08X";
     snprintf(string100, 100, fmt, words[3], words[2], words[1], words[0]);
+#endif
   }
 }
 
